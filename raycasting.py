@@ -19,7 +19,7 @@ class RayCasting:
             sin_a = math.sin(ray_angle)
             cos_a = math.cos(ray_angle)
 
-            # calculate intersection with horizontal lines
+            # calculate intersection with horizontal lines, check if possible to extract a method
             if sin_a > 0:
                 y_hor = y_map + 1
                 dy = 1
@@ -69,9 +69,19 @@ class RayCasting:
             else:
                 depth = depth_hor
 
-             # draw
-            pg.draw.line(self.game.screen, 'yellow', (100*ox, 100*oy),
-                         (100 * ox + 100 * depth * cos_a, 100 * oy + 100 * depth * sin_a), 2)
+            # remove fishbowl effect due to the cartesian system.
+            depth *= math.cos(self.game.player.angle - ray_angle)
+
+            # projection 3D
+            proj_height = SCREEN_DIST / \
+                (depth + 0.00001)  # avoid division by 0
+
+            # create a gradient effect where walls closer to the player are brighter and walls farther away are darker.
+            color = [220 / (1 + depth ** 5 * 0.0002), 150 / (1 +
+                                                             depth ** 5 * 0.0002), 200 / (1 + depth ** 5 * 0.0002)]
+
+            pg.draw.rect(self.game.screen, color, (ray * SCALE,
+                                                   HALF_HEIGHT - proj_height // 2, SCALE, proj_height))
 
             ray_angle += DELTA_ANGLE
 
